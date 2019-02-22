@@ -1,0 +1,57 @@
+<!doctype html>
+<title>show randomness distribution</title>
+
+<style>
+  canvas { border: 1px solid black; }
+</style>
+
+<h1>show randomness distribution</h1>
+
+<canvas width="500" height="400"></canvas>
+
+<script>
+  const canvasEl = document.querySelector('canvas');
+  const c = canvasEl.getContext('2d');
+
+  const picks = new Array(canvasEl.width);
+  for (let i=0; i<picks.length; i+=1) {
+    picks[i] = { n: 0 };
+  }
+
+  generateSome();
+
+  function generateSome() {
+    for (let i=0; i<1000; i+=1) {
+      generateRandom();
+    }
+
+    drawRandoms();
+    requestAnimationFrame(generateSome);
+  }
+
+  function generateRandom() {
+    const pick = selectNormal(picks);
+    pick.n += 1;
+  }
+
+  function drawRandoms() {
+    c.clearRect(0,0,canvasEl.width,canvasEl.height);
+    c.fillStyle = "black";
+    const numbers = picks.map(p => p.n);
+    const min = 0;
+    const max = Math.max(1, ...numbers);
+    const norm = canvasEl.height / max;
+    for (let i=0; i<picks.length; i+=1) {
+      c.fillRect(i,canvasEl.height - picks[i].n*norm,1,1);
+    }
+  }
+
+function selectRandom(arr) {
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function selectNormal(arr) {
+  let rand = (Math.random() + Math.random())/2;
+  return arr[Math.floor(rand*arr.length)];
+}
+</script>

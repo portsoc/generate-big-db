@@ -1,6 +1,7 @@
 -- queries
 
 use bigdb2019;
+use bigdb2019_2;
 
 
 -- find out the most common student first name, and how many students have that first name
@@ -35,6 +36,9 @@ select count(*)
 from student
 where tutorID = 10606;
 
+-- find name
+select * from lecturer where id = 10606;
+
 
 -- how many personal tutees does Alysia Ciarletta (id 10606) have this year?
 
@@ -64,8 +68,19 @@ from student s
 join enrolment e on s.id = e.studentID
 join unit u on e.unitID = u.id
 where e.year = 2018
-  and u.code = 'ZAREM'
+  and u.code = 'IPRON' -- 'ZAREM'
 order by s.lname, s.fname;
+
+-- selecting a good unit
+select u.*, count(e.studentID)
+from unit u
+join enrolment e on e.unitID = u.id
+where e.year = 2018
+group by u.id
+order by count(e.studentID);
+
+-- IPRON
+
 
 
 -- who did really well (with a mark of at least 80) in ZAREM in 2017?
@@ -77,7 +92,7 @@ from student s
 join enrolment e on s.id = e.studentID
 join unit u on e.unitID = u.id
 where e.year = 2017
-  and u.code = 'ZAREM'
+  and u.code = 'IPRON' -- 'ZAREM'
   and e.mark >= 80;
 
 
@@ -86,10 +101,14 @@ where e.year = 2017
 select s.id, s.fname, s.lname, round(avg(mark)) as avg_mark
 from student s
 join enrolment e on e.studentID = s.id
-where s.tutorID = 10069
+where s.tutorID = 11107 -- 10069
   and e.year = 2018
 group by s.id
 order by s.lname, s.fname;
+
+-- selecting a good lecturer
+select * from lecturer order by lname, fname;
+-- 11107
 
 
 -- find the lecturer with the best average mark this year of all their personal tutees
@@ -117,10 +136,31 @@ select u.*, avg(mark)
 from unit u
 join teaching t on t.unitID = u.id
 join enrolment e on e.unitID = u.id
-where t.lectID = 10251
+where t.lectID = 10133 -- 10251
 group by u.id
 order by avg(mark) desc
 limit 1;
+
+-- selecting a good lecturer
+select l.*, count(*)
+from lecturer l
+join teaching t on t.lectID = l.id
+group by l.id
+having count(*) > 2;
+
+select t.lectID, u.*, avg(mark)
+from unit u
+join teaching t on t.unitID = u.id
+join enrolment e on e.unitID = u.id
+where t.lectID in (
+  select l.id
+  from lecturer l
+  join teaching t on t.lectID = l.id
+  group by l.id
+  having count(*) > 2
+)
+group by u.id
+order by t.lectID, avg(mark) desc;
 
 
 -- for the unit above, find out how the average mark has changed each year
